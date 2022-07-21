@@ -50,6 +50,10 @@ export class AppService {
       try {
         let dbUser = await this.userRepository.createQueryBuilder('user').where('ipAddress = :ia', { ia: ipAddress }).getOne();
 
+        if (!dbUser) {
+          dbUser = await this.userRepository.createQueryBuilder('user').where('walletAddress = :wa', { wa: request.walletAddress }).getOne();
+        }
+
         if (dbUser) {
           const expiry = Number(dbUser.expiry);
           const now = new Date().getTime();
@@ -57,7 +61,7 @@ export class AppService {
           if (expiry > now) {
             reject('You can request again by: ' + new Date(expiry).toString());
             return false;
-          } 
+          }
         } else {
           dbUser = {
             expiry: '',
