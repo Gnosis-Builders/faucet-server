@@ -84,7 +84,7 @@ export class AppService {
           walletAddresses: [...dbUser.walletAddresses, request.walletAddress],
         };
 
-        // this.logger.debug(dbUser);
+        this.logger.debug(dbUser);
         // if (dbUser.id) {
         //   this.userRepository.delete({ id: dbUser.id });
         // }
