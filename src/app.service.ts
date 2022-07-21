@@ -88,6 +88,19 @@ export class AppService {
     });
   }
 
+  async walletBalance() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        this.connectWeb3("Gnosis Chain");
+        const wallet = new Wallet(decrypt(this.configService.get<string>('PRIVATE_KEY')), this.provider);
+        const balance = await wallet.provider.getBalance(wallet.address);
+        resolve(ethers.utils.formatEther(balance));
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
   async requestToken(request: RequestToken, ipAddress: string) {
     return new Promise(async (resolve, reject) => {
       try {

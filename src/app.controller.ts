@@ -22,4 +22,9 @@ export class AppController {
     console.log("FF: ", req.headers['x-forwarded-for']);
     return ResponseUtils.getSuccessResponse(await this.appService.requestToken(request, ipAddress));
   }
+
+  @Get('/wallet-balance')
+  async getWalletBalance() {
+    return ResponseUtils.getSuccessResponse(await this.appService.walletBalance());
+  }
 }
