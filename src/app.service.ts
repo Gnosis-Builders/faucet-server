@@ -77,16 +77,17 @@ export class AppService {
         const expiry = new Date().getTime() + +this.configService.get<number>('WAIT_TIME_MILLI');
 
         dbUser = {
+          id: dbUser.id,
           expiry: expiry.toString(),
           ipAddress: ipAddress,
           networks: [...dbUser.networks, request.network],
           walletAddresses: [...dbUser.walletAddresses, request.walletAddress],
         };
 
-        this.logger.debug(dbUser);
-        if (dbUser.id) {
-          this.userRepository.delete({ id: dbUser.id });
-        }
+        // this.logger.debug(dbUser);
+        // if (dbUser.id) {
+        //   this.userRepository.delete({ id: dbUser.id });
+        // }
 
         this.userRepository.save(dbUser);
 
