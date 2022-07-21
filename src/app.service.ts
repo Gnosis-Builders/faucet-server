@@ -51,7 +51,10 @@ export class AppService {
         let dbUser = await this.userRepository.createQueryBuilder('user').where('ipAddress = :ia', { ia: ipAddress }).getOne();
 
         if (!dbUser) {
-          dbUser = await this.userRepository.createQueryBuilder('user').where('walletAddress = :wa', { wa: request.walletAddress }).getOne();
+          dbUser = await this.userRepository
+            .createQueryBuilder('user')
+            .where('upper(walletAddresses) LIKE :wa', { wa: `%${request.walletAddress.toUpperCase()}%` })
+            .getOne();
         }
 
         if (dbUser) {
@@ -91,7 +94,7 @@ export class AppService {
   async walletBalance() {
     return new Promise(async (resolve, reject) => {
       try {
-        this.connectWeb3("Gnosis Chain");
+        this.connectWeb3('Gnosis Chain');
         const wallet = new Wallet(decrypt(this.configService.get<string>('PRIVATE_KEY')), this.provider);
         const balance = await wallet.provider.getBalance(wallet.address);
         resolve(ethers.utils.formatEther(balance));
