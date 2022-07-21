@@ -82,6 +82,12 @@ export class AppService {
           networks: [...dbUser.networks, request.network],
           walletAddresses: [...dbUser.walletAddresses, request.walletAddress],
         };
+
+        this.logger.debug(dbUser);
+        if (dbUser.id) {
+          this.userRepository.delete({ id: dbUser.id });
+        }
+
         this.userRepository.save(dbUser);
 
         resolve(true);
