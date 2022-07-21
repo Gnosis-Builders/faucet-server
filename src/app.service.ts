@@ -56,7 +56,8 @@ export class AppService {
 
           if (expiry > now) {
             reject('You can request again by: ' + new Date(expiry).toString());
-          }
+            return false;
+          } 
         } else {
           dbUser = {
             expiry: '',

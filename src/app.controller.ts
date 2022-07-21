@@ -11,7 +11,11 @@ export class AppController {
 
   @Post('/request-token')
   async requestToken(@Body() request: RequestToken, @Req() req): Promise<Response> {
-    const ipAddress = req.connection.remoteAddress;
+    const ipAddress = req.socket.remoteAddress;
+    console.log(ipAddress);
+    console.log("req.socket.remoteAddress: ", req.socket.remoteAddress);
+    console.log("req.connection.remoteAddress: ", req.connection.remoteAddress);
+    console.log("FF: ", req.headers['x-forwarded-for']);
     return ResponseUtils.getSuccessResponse(await this.appService.requestToken(request, ipAddress));
   }
 }
