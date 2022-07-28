@@ -23,10 +23,20 @@ export class ResponseUtils {
 
     return r;
   }
+
+  static getErrorResponse(data: any, message?: string): Response {
+    const r: Response = {
+      status: 'error',
+      message: message,
+      data: data,
+    };
+
+    return r;
+  }
 }
 
 export class Response {
-  status: string;
+  status: 'success' | 'error';
   message: string;
   data: any;
 }

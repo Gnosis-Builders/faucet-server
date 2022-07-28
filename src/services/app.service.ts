@@ -1,11 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { RequestToken } from './dtos';
+import { RequestToken } from '../dtos';
 import { ethers, Wallet } from 'ethers';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from './entities/user.entity';
+import { UserEntity } from '../entities/user.entity';
 import { Repository } from 'typeorm';
-import { decrypt } from './utiils';
+import { TwitterService } from './twitter.service';
+import { decrypt } from 'src/utiils';
 
 @Injectable()
 export class AppService {
@@ -15,7 +16,7 @@ export class AppService {
 
   @InjectRepository(UserEntity) userRepository: Repository<UserEntity>;
 
-  constructor(private configService: ConfigService) {
+  constructor(private configService: ConfigService, private twitterService: TwitterService) {
     this.logger.debug('AppService Loaded');
   }
 
@@ -26,11 +27,10 @@ export class AppService {
     this.provider = new ethers.providers.JsonRpcProvider(web3Provider);
   }
 
-  private async sendDAI(receiverAddress: string): Promise<string> {
+  private async sendDAI(receiverAddress: string, amount: string): Promise<string> {
     return new Promise(async (resolve, reject) => {
       try {
         const wallet = new Wallet(decrypt(this.configService.get<string>('PRIVATE_KEY')), this.provider);
-        const amount = this.configService.get<string>('GNOSIS_CHAIN_AMOUNT');
         const tx = {
           to: receiverAddress,
           // Convert currency unit from ether to wei
@@ -53,7 +53,7 @@ export class AppService {
         if (!dbUser) {
           dbUser = await this.userRepository
             .createQueryBuilder('user')
-            .where('upper(walletAddresses) LIKE :wa', { wa: `%${request.walletAddress.toUpperCase()}%` })
+            .where('upper(lastWalletAddress) = :wa', { wa: request.walletAddress.toUpperCase() })
             .getOne();
         }
 
@@ -71,6 +71,7 @@ export class AppService {
             ipAddress: '',
             networks: [],
             walletAddresses: [],
+            lastWalletAddress: '',
           };
         }
 
@@ -82,12 +83,8 @@ export class AppService {
           ipAddress: ipAddress,
           networks: [...dbUser.networks, request.network],
           walletAddresses: [...dbUser.walletAddresses, request.walletAddress],
+          lastWalletAddress: request.walletAddress,
         };
-
-        this.logger.debug(dbUser);
-        // if (dbUser.id) {
-        //   this.userRepository.delete({ id: dbUser.id });
-        // }
 
         this.userRepository.save(dbUser);
 
@@ -112,15 +109,32 @@ export class AppService {
   }
 
   async requestToken(request: RequestToken, ipAddress: string) {
+    this.logger.debug(`Request Token: ${request}`);
     return new Promise(async (resolve, reject) => {
       try {
+        let amount = this.configService.get<string>('LOWER_AMOUNT');
+
         const crt = await this.canRequestToken(request, ipAddress);
         if (crt) {
+          try {
+            if (request.userId !== undefined && request.userId.length > 0) {
+              const id = await this.twitterService.post(request.userId, this.configService.get<string>('TWEET_TEXT'));
+              if (id !== undefined) {
+                amount = this.configService.get<string>('HIGHER_AMOUNT');
+              }
+            }
+          } catch (err) {
+            // do nothing really
+            // resolve('Can not send tweet');
+          }
+
+          this.logger.debug('Sending Amount: '.concat(amount).concat(' to address ').concat(request.walletAddress));
+
           this.connectWeb3(request.network);
 
           switch (request.network) {
             case 'Gnosis Chain':
-              const hash = await this.sendDAI(request.walletAddress);
+              const hash = await this.sendDAI(request.walletAddress, amount);
               resolve(hash);
             default:
               throw new Error('Unknown chain provided');
