@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/entities/user.entity';
-import { Response, ResponseUtils } from 'src/utiils';
+import { Response, ResponseUtils } from 'src/utils/common';
 import { TwitterApi } from 'twitter-api-v2';
 import { Repository } from 'typeorm';
 

@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { RequestToken } from '../dtos';
+import { RequestToken } from '../utils/dtos';
 import { ethers, Wallet } from 'ethers';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { Repository } from 'typeorm';
 import { TwitterService } from './twitter.service';
-import { decrypt } from 'src/utiils';
+import { decrypt } from 'src/utils/common';
 
 @Injectable()
 export class AppService {

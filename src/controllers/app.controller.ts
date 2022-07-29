@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Post, Req, UseFilters } from '@nestjs/common';
 import { AppService } from '../services/app.service';
-import { RequestToken } from '../dtos';
-import { ExceptionsFilter } from '../exception.filter';
-import { Response, ResponseUtils } from '../utiils';
+import { RequestToken } from '../utils/dtos';
+import { ExceptionsFilter } from '../filters/exception.filter';
+import { Response, ResponseUtils } from '../utils/common';
 
 @Controller()
 @UseFilters(ExceptionsFilter)
