@@ -109,7 +109,6 @@ export class AppService {
   }
 
   async requestToken(request: RequestToken, ipAddress: string) {
-    this.logger.debug(`Request Token: ${request}`);
     return new Promise(async (resolve, reject) => {
       try {
         let amount = this.configService.get<string>('LOWER_AMOUNT');
@@ -124,8 +123,7 @@ export class AppService {
               }
             }
           } catch (err) {
-            // do nothing really
-            // resolve('Can not send tweet');
+            this.logger.error(err);
           }
 
           this.logger.debug('Sending Amount: '.concat(amount).concat(' to address ').concat(request.walletAddress));
