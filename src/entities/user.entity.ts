@@ -1,4 +1,4 @@
-import { Network } from 'src/dtos';
+import { Network } from 'src/utils/dtos';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'user' })

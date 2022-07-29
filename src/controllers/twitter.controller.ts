@@ -1,7 +1,7 @@
 import { Controller, Get, Query, Req, Res, UseFilters } from '@nestjs/common';
-import { ExceptionsFilter } from 'src/exception.filter';
+import { ExceptionsFilter } from 'src/filters/exception.filter';
 import { TwitterService } from 'src/services/twitter.service';
-import { Response, ResponseUtils } from 'src/utiils';
+import { Response, ResponseUtils } from 'src/utils/common';
 
 @Controller()
 @UseFilters(ExceptionsFilter)

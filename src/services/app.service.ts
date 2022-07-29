@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { RequestToken } from '../dtos';
+import { RequestToken } from '../utils/dtos';
 import { ethers, Wallet } from 'ethers';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { Repository } from 'typeorm';
 import { TwitterService } from './twitter.service';
-import { decrypt } from 'src/utiils';
+import { decrypt } from 'src/utils/common';
 
 @Injectable()
 export class AppService {
@@ -109,7 +109,6 @@ export class AppService {
   }
 
   async requestToken(request: RequestToken, ipAddress: string) {
-    this.logger.debug(`Request Token: ${request}`);
     return new Promise(async (resolve, reject) => {
       try {
         let amount = this.configService.get<string>('LOWER_AMOUNT');
@@ -124,8 +123,7 @@ export class AppService {
               }
             }
           } catch (err) {
-            // do nothing really
-            // resolve('Can not send tweet');
+            this.logger.error(err);
           }
 
           this.logger.debug('Sending Amount: '.concat(amount).concat(' to address ').concat(request.walletAddress));
