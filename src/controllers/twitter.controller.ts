@@ -9,10 +9,10 @@ export class TwitterController {
   constructor(private readonly twitterService: TwitterService) {}
 
   @Get('/twitter/v1/login')
-  async login(@Query('wallet') walletAddress, @Req() req): Promise<Response> {
-    let ipAddress = req.headers['x-forwarded-for'];
+  async login(@Query('wallet') walletAddress: string, @Req() req): Promise<Response> {
+    let ipAddress: string = req.headers['x-forwarded-for'];
 
-    if (ipAddress) {
+    if (ipAddress.length > 0) {
       ipAddress = ipAddress.split(',')[0];
     } else {
       ipAddress = req.socket.remoteAddress;
@@ -22,7 +22,7 @@ export class TwitterController {
   }
 
   @Get('/twitter/v1/callback')
-  async callback(@Query('oauth_token') token: string, @Query('oauth_verifier') verifier, @Res() res) {
+  async callback(@Query('oauth_token') token: string, @Query('oauth_verifier') verifier: string, @Res() res): Promise<void> {
     const response = await this.twitterService.callback(token, verifier);
     if (response.status === 'success') {
       res.redirect(response.data);
