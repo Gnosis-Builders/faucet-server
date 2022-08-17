@@ -19,6 +19,6 @@ export class AppController {
       ipAddress = req.socket.remoteAddress;
     }
 
-    return ResponseUtils.getSuccessResponse(await this.appService.requestToken(request, ipAddress), "");
+    return ResponseUtils.getSuccessResponse(await this.appService.requestToken(request, ipAddress), '');
   }
 }

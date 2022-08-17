@@ -5,8 +5,6 @@ export class ExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(ExceptionsFilter.name);
 
   catch(exception, host: ArgumentsHost) {
-    console.log(exception);
-    console.log(exception.message);
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
@@ -14,9 +12,11 @@ export class ExceptionsFilter implements ExceptionFilter {
     this.logger.error('Error: ');
     this.logger.error(exception);
     let message = exception;
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (exception.message) {
       message = exception.message;
     }
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (exception.response) {
       message = exception.response.message;
     }
