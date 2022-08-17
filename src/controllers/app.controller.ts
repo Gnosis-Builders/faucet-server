@@ -13,18 +13,12 @@ export class AppController {
   async requestToken(@Body() request: RequestToken, @Req() req): Promise<Response> {
     let ipAddress = req.headers['x-forwarded-for'];
 
-    if (ipAddress) {
+    if (ipAddress !== undefined) {
       ipAddress = ipAddress.split(',')[0];
     } else {
       ipAddress = req.socket.remoteAddress;
     }
 
-    console.log('FF: ', req.headers['x-forwarded-for']);
-    return ResponseUtils.getSuccessResponse(await this.appService.requestToken(request, ipAddress));
-  }
-
-  @Get('/wallet-balance')
-  async getWalletBalance() {
-    return ResponseUtils.getSuccessResponse(await this.appService.walletBalance());
+    return ResponseUtils.getSuccessResponse(await this.appService.requestToken(request, ipAddress), "");
   }
 }

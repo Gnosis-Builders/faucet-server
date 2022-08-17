@@ -9,6 +9,6 @@ async function bootstrap() {
   app.enableCors();
   app.setGlobalPrefix('/api');
   app.useGlobalFilters(new ExceptionsFilter());
-  await app.listen(process.env.PORT);
+  await app.listen(process.env.PORT as string);
 }
 bootstrap();
