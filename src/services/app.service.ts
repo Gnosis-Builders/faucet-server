@@ -44,9 +44,16 @@ export class AppService {
       .createQueryBuilder('user')
       .where('ipAddress = :ia', { ia: ipAddress })
       .andWhere('lastNetwork = :ln', { ln: request.network })
-      .andWhere('upper(lastWalletAddress) = :wa', { wa: request.walletAddress.toUpperCase() })
       .getOne();
 
+    if (!dbUser) {
+      dbUser = await this.userRepository
+        .createQueryBuilder('user')
+        .andWhere('upper(lastWalletAddress) = :wa', { wa: request.walletAddress.toUpperCase() })
+        .andWhere('lastNetwork = :ln', { ln: request.network })
+        .getOne();
+    }
+    
     if (dbUser) {
       const expiry = Number(dbUser.expiry);
       const now = new Date().getTime();
@@ -72,7 +79,7 @@ export class AppService {
     } else if (request.network === 'Chiado Testnet') {
       waitTime = this.configService.get<number>('CHIADO_WAIT_TIME_MILLI') as number;
     }
-    
+
     const expiry = new Date().getTime() + +waitTime;
 
     dbUser = {
