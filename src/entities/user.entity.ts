@@ -14,12 +14,8 @@ export class UserEntity {
   networks: Array<Network>;
   @Column()
   expiry: string;
-  @Column()
-  twitterToken: string;
-  @Column()
-  twitterSecret: string;
-  @Column({ default: '' })
-  twitterId: string;
   @Column({ default: '' })
   lastWalletAddress: string;
+  @Column({ default: '' })
+  lastNetwork: Network;
 }

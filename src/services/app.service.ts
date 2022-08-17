@@ -40,14 +40,12 @@ export class AppService {
   }
 
   private async canRequestToken(request: RequestToken, ipAddress): Promise<boolean> {
-    let dbUser = await this.userRepository.createQueryBuilder('user').where('ipAddress = :ia', { ia: ipAddress }).getOne();
-
-    if (!dbUser) {
-      dbUser = await this.userRepository
-        .createQueryBuilder('user')
-        .where('upper(lastWalletAddress) = :wa', { wa: request.walletAddress.toUpperCase() })
-        .getOne();
-    }
+    let dbUser = await this.userRepository
+      .createQueryBuilder('user')
+      .where('ipAddress = :ia', { ia: ipAddress })
+      .andWhere('lastNetwork = :ln', { ln: request.network })
+      .andWhere('upper(lastWalletAddress) = :wa', { wa: request.walletAddress.toUpperCase() })
+      .getOne();
 
     if (dbUser) {
       const expiry = Number(dbUser.expiry);
@@ -63,13 +61,18 @@ export class AppService {
         networks: [],
         walletAddresses: [],
         lastWalletAddress: '',
-        twitterId: '',
-        twitterSecret: '',
-        twitterToken: '',
+        lastNetwork: 'Gnosis Chain',
       };
     }
 
-    const waitTime = this.configService.get<number>('WAIT_TIME_MILLI') as number;
+    let waitTime;
+
+    if (request.network === 'Gnosis Chain') {
+      waitTime = this.configService.get<number>('GNOSIS_WAIT_TIME_MILLI') as number;
+    } else if (request.network === 'Chiado Testnet') {
+      waitTime = this.configService.get<number>('CHIADO_WAIT_TIME_MILLI') as number;
+    }
+    
     const expiry = new Date().getTime() + +waitTime;
 
     dbUser = {
@@ -79,9 +82,7 @@ export class AppService {
       networks: [...dbUser.networks, request.network],
       walletAddresses: [...dbUser.walletAddresses, request.walletAddress],
       lastWalletAddress: request.walletAddress,
-      twitterId: '',
-      twitterSecret: '',
-      twitterToken: '',      
+      lastNetwork: request.network,
     };
 
     this.userRepository.save(dbUser);
