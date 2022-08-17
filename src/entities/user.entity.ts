@@ -15,11 +15,11 @@ export class UserEntity {
   @Column()
   expiry: string;
   @Column()
-  twitterToken?: string;
+  twitterToken: string;
   @Column()
-  twitterSecret?: string;
+  twitterSecret: string;
   @Column({ default: '' })
-  twitterId?: string;
+  twitterId: string;
   @Column({ default: '' })
   lastWalletAddress: string;
 }

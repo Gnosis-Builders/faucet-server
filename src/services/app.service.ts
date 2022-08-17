@@ -63,6 +63,9 @@ export class AppService {
         networks: [],
         walletAddresses: [],
         lastWalletAddress: '',
+        twitterId: '',
+        twitterSecret: '',
+        twitterToken: '',
       };
     }
 
@@ -76,6 +79,9 @@ export class AppService {
       networks: [...dbUser.networks, request.network],
       walletAddresses: [...dbUser.walletAddresses, request.walletAddress],
       lastWalletAddress: request.walletAddress,
+      twitterId: '',
+      twitterSecret: '',
+      twitterToken: '',      
     };
 
     this.userRepository.save(dbUser);
