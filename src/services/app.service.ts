@@ -53,7 +53,7 @@ export class AppService {
         .andWhere('lastNetwork = :ln', { ln: request.network })
         .getOne();
     }
-    
+
     if (dbUser) {
       const expiry = Number(dbUser.expiry);
       const now = new Date().getTime();
@@ -127,7 +127,7 @@ export class AppService {
         }
       }
     } else if (request.network === 'Chiado Testnet') {
-      amount = this.configService.get<string>('HIGHER_AMOUNT') as string;
+      amount = this.configService.get<string>('CHIADO_AMOUNT') as string;
     }
 
     const crt = await this.canRequestToken(request, ipAddress);
