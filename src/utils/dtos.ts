@@ -1,4 +1,4 @@
-export type Network = 'Gnosis Chain' | 'Chiado Testnet' | 'Optimism L2';
+export type Network = 'Gnosis Chain' | 'Chiado Testnet' | 'Optimism';
 
 export interface RequestToken {
   walletAddress: string;

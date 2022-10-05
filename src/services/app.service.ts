@@ -22,7 +22,7 @@ export class AppService {
 
   private async connectWeb3(chain: string) {
     const web3Key = `${chain.replace(' ', '_').toUpperCase()}_WEB3_PROVIDER`;
-
+    this.logger.debug(web3Key);
     const web3Provider = this.configService.get<string>(web3Key);
     this.provider = new ethers.providers.JsonRpcProvider(web3Provider);
   }
@@ -78,6 +78,8 @@ export class AppService {
       waitTime = this.configService.get<number>('GNOSIS_WAIT_TIME_MILLI') as number;
     } else if (request.network === 'Chiado Testnet') {
       waitTime = this.configService.get<number>('CHIADO_WAIT_TIME_MILLI') as number;
+    } else if (request.network === 'Optimism') {
+      waitTime = this.configService.get<number>('OPTIMISM_WAIT_TIME_MILLI') as number;
     }
 
     const expiry = new Date().getTime() + +waitTime;
@@ -128,18 +130,20 @@ export class AppService {
       }
     } else if (request.network === 'Chiado Testnet') {
       amount = this.configService.get<string>('CHIADO_AMOUNT') as string;
+    } else if (request.network === 'Optimism') {
+      amount = this.configService.get<string>('OPTIMISM_AMOUNT') as string;
     }
 
     const crt = await this.canRequestToken(request, ipAddress);
     if (crt) {
-      this.logger.debug('Sending Amount: '.concat(amount).concat(' to address ').concat(request.walletAddress));
+      this.logger.debug(
+        'Sending Amount: '.concat(amount).concat(' to address ').concat(request.walletAddress).concat(' on ').concat(request.network),
+      );
 
       this.connectWeb3(request.network);
 
-      if (request.network === 'Chiado Testnet' || request.network === 'Gnosis Chain') {
-        const hash = await this.sendDAI(request.walletAddress, amount);
-        return hash;
-      }
+      const hash = await this.sendDAI(request.walletAddress, amount);
+      return hash;
     }
     return '';
   }
