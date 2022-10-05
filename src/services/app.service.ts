@@ -21,6 +21,10 @@ export class AppService {
   }
 
   private async connectWeb3(chain: string) {
+    if (chain.indexOf('Optimism') >= 0) {
+      chain = 'Optimism';
+    }
+
     const web3Key = `${chain.replace(' ', '_').toUpperCase()}_WEB3_PROVIDER`;
     this.logger.debug(web3Key);
     const web3Provider = this.configService.get<string>(web3Key);
@@ -78,7 +82,7 @@ export class AppService {
       waitTime = this.configService.get<number>('GNOSIS_WAIT_TIME_MILLI') as number;
     } else if (request.network === 'Chiado Testnet') {
       waitTime = this.configService.get<number>('CHIADO_WAIT_TIME_MILLI') as number;
-    } else if (request.network === 'Optimism') {
+    } else if (request.network === 'Optimism on Gnosis Chain') {
       waitTime = this.configService.get<number>('OPTIMISM_WAIT_TIME_MILLI') as number;
     }
 
@@ -130,7 +134,7 @@ export class AppService {
       }
     } else if (request.network === 'Chiado Testnet') {
       amount = this.configService.get<string>('CHIADO_AMOUNT') as string;
-    } else if (request.network === 'Optimism') {
+    } else if (request.network === 'Optimism on Gnosis Chain') {
       amount = this.configService.get<string>('OPTIMISM_AMOUNT') as string;
     }
 

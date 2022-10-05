@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseFilters } from '@nestjs/common';
+import { Body, Controller, Logger, Post, Req, UseFilters } from '@nestjs/common';
 import { AppService } from '../services/app.service';
 import { RequestToken } from '../utils/dtos';
 import { ExceptionsFilter } from '../filters/exception.filter';
@@ -7,10 +7,12 @@ import { Response, ResponseUtils } from '../utils/common';
 @Controller()
 @UseFilters(ExceptionsFilter)
 export class AppController {
+  private readonly logger = new Logger(AppController.name);
   constructor(private readonly appService: AppService) {}
 
   @Post('/request-token')
   async requestToken(@Body() request: RequestToken, @Req() req): Promise<Response> {
+    Logger.debug(request);
     let ipAddress = req.headers['x-forwarded-for'];
 
     if (ipAddress !== undefined) {
