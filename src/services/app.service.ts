@@ -43,7 +43,33 @@ export class AppService {
     return txObj.hash;
   }
 
-  private async canRequestToken(request: RequestToken, ipAddress): Promise<boolean> {
+  private async checkResetPeriod(request: RequestToken, ipAddress: string): Promise<void> {
+    const dbUser = await this.userRepository
+      .createQueryBuilder('user')
+      .where('ipAddress = :ia', { ia: ipAddress })
+      .orWhere('lastNetwork = :ln', { ln: request.network })
+      .getOne();
+
+    if (dbUser != null) {
+      const addresses = dbUser.resetWalletAddresses;
+      const lastResetDate = +dbUser.lastResetDate;
+      const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+      const now = new Date().getTime();
+
+      if (lastResetDate + thirtyDays <= now) {
+        dbUser.lastResetDate = now.toString();
+        dbUser.resetWalletAddresses = [];
+        this.userRepository.save(dbUser);
+      } else {
+        const max = Number(this.configService.get('RESET_LIMIT'));
+        if (addresses.length >= max) {
+          throw Error(`You have reached the ${this.configService.get('RESET_PERIOD')} days limit.`);
+        }
+      }
+    }
+  }
+
+  private async canRequestToken(request: RequestToken, ipAddress: string): Promise<boolean> {    
     let dbUser = await this.userRepository
       .createQueryBuilder('user')
       .where('ipAddress = :ia', { ia: ipAddress })
@@ -73,6 +99,8 @@ export class AppService {
         walletAddresses: [],
         lastWalletAddress: '',
         lastNetwork: 'Gnosis Chain',
+        lastResetDate: Date.now().toString(),
+        resetWalletAddresses: [],
       };
     }
 
@@ -96,6 +124,8 @@ export class AppService {
       walletAddresses: [...dbUser.walletAddresses, request.walletAddress],
       lastWalletAddress: request.walletAddress,
       lastNetwork: request.network,
+      lastResetDate: dbUser.lastResetDate,
+      resetWalletAddresses: [...dbUser.resetWalletAddresses, request.walletAddress],
     };
 
     this.userRepository.save(dbUser);
@@ -138,6 +168,7 @@ export class AppService {
       amount = this.configService.get<string>('OPTIMISM_AMOUNT') as string;
     }
 
+    await this.checkResetPeriod(request, ipAddress);
     const crt = await this.canRequestToken(request, ipAddress);
     if (crt) {
       this.logger.debug(
