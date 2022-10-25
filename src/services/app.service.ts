@@ -7,6 +7,7 @@ import { UserEntity } from '../entities/user.entity';
 import { Repository } from 'typeorm';
 import { decrypt } from 'src/utils/common';
 import TwitterApi from 'twitter-api-v2';
+import { ERC20ABI, GNOSIS, NETWORKS } from 'src/utils/constants';
 
 @Injectable()
 export class AppService {
@@ -21,22 +22,25 @@ export class AppService {
   }
 
   private async connectWeb3(chain: string) {
-    if (chain.indexOf('Optimism') >= 0) {
-      chain = 'Optimism';
-    }
-
-    const web3Key = `${chain.replace(' ', '_').toUpperCase()}_WEB3_PROVIDER`;
-    this.logger.debug(web3Key);
-    const web3Provider = this.configService.get<string>(web3Key);
+    const web3Provider = NETWORKS[chain].web3Provider;
     this.provider = new ethers.providers.JsonRpcProvider(web3Provider);
   }
 
-  private async sendDAI(receiverAddress: string, amount: string): Promise<string> {
+  private async sendToken(receiverAddress: string, amount: number, network: string): Promise<string> {
+    const wallet = new Wallet(decrypt(this.configService.get<string>('PRIVATE_KEY') as string), this.provider);    
+    const contract = new ethers.Contract(NETWORKS[network].contractAddress, ERC20ABI, wallet);
+    const txObj = await contract.transfer(receiverAddress, ethers.utils.parseUnits(amount + ''));
+    const tx = await txObj.wait();
+    this.logger.log(tx.transactionHash);
+    return tx.transactionHash;
+  }
+
+  private async sendDAI(receiverAddress: string, amount: number): Promise<string> {
     const wallet = new Wallet(decrypt(this.configService.get<string>('PRIVATE_KEY') as string), this.provider);
     const tx = {
       to: receiverAddress,
       // Convert currency unit from ether to wei
-      value: ethers.utils.parseEther(amount),
+      value: ethers.utils.parseEther(amount + ''),
     };
 
     const txObj = await wallet.sendTransaction(tx);
@@ -69,7 +73,7 @@ export class AppService {
     }
   }
 
-  private async canRequestToken(request: RequestToken, ipAddress: string): Promise<boolean> {    
+  private async canRequestToken(request: RequestToken, ipAddress: string): Promise<boolean> {
     let dbUser = await this.userRepository
       .createQueryBuilder('user')
       .where('ipAddress = :ia', { ia: ipAddress })
@@ -104,15 +108,7 @@ export class AppService {
       };
     }
 
-    let waitTime;
-
-    if (request.network === 'Gnosis Chain') {
-      waitTime = this.configService.get<number>('GNOSIS_WAIT_TIME_MILLI') as number;
-    } else if (request.network === 'Chiado Testnet') {
-      waitTime = this.configService.get<number>('CHIADO_WAIT_TIME_MILLI') as number;
-    } else if (request.network === 'Optimism on Gnosis Chain') {
-      waitTime = this.configService.get<number>('OPTIMISM_WAIT_TIME_MILLI') as number;
-    }
+    const waitTime = NETWORKS[request.network].waitTime;
 
     const expiry = new Date().getTime() + +waitTime;
 
@@ -141,10 +137,10 @@ export class AppService {
   }
 
   async requestToken(request: RequestToken, ipAddress: string): Promise<string> {
-    let amount = this.configService.get<string>('LOWER_AMOUNT') as string;
+    let amount = NETWORKS[request.network].lowerAmount;
 
     // TODO: check tweetUrl here
-    if (request.network === 'Gnosis Chain') {
+    if (request.network === GNOSIS) {
       if (request.tweetUrl.length > 0) {
         // get the tweet amount from the tweet url
         const urlRegex = /https:\/\/twitter.com\/\w+\/status\/(\d+)/g;
@@ -155,29 +151,27 @@ export class AppService {
           const tweetRegex = /Requesting (0.0\d+)/;
           const tweetMatches = tweetRegex.exec(tweet);
           if (tweetMatches) {
-            amount = tweetMatches[1];
-            if (amount !== request.amount) {
+            amount = Number(tweetMatches[1]);
+            if (amount !== +request.amount) {
               throw Error('Amount in tweet does not match amount in request');
             }
           }
         }
       }
-    } else if (request.network === 'Chiado Testnet') {
-      amount = this.configService.get<string>('CHIADO_AMOUNT') as string;
-    } else if (request.network === 'Optimism on Gnosis Chain') {
-      amount = this.configService.get<string>('OPTIMISM_AMOUNT') as string;
     }
 
     await this.checkResetPeriod(request, ipAddress);
     const crt = await this.canRequestToken(request, ipAddress);
     if (crt) {
-      this.logger.debug(
-        'Sending Amount: '.concat(amount).concat(' to address ').concat(request.walletAddress).concat(' on ').concat(request.network),
-      );
+      this.logger.debug(`Sending Amount: ${amount} to address ${request.walletAddress} on ${request.network}`);
 
       this.connectWeb3(request.network);
-
-      const hash = await this.sendDAI(request.walletAddress, amount);
+      let hash;
+      if(NETWORKS[request.network].isNative) {
+        hash = await this.sendDAI(request.walletAddress, amount);
+      } else {
+        hash = await this.sendToken(request.walletAddress, amount, request.network);
+      }
       return hash;
     }
     return '';
