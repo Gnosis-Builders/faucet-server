@@ -1,7 +1,7 @@
 export const GNOSIS = 'Gnosis Chain';
-export const CHIADO = 'Chiado Testnet';
+export const CHIADO = 'Chiado Testnet (xDAI)';
 export const OPTIMISM_GNOSIS = 'Optimism on Gnosis Chain';
-export const GNO_CHIADO = 'GNO on Chiado Testnet';
+export const GNO_CHIADO = 'Chiado Testnet (GNO)';
 
 type Network = {
   name: string;
