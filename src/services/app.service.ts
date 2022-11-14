@@ -27,7 +27,7 @@ export class AppService {
   }
 
   private async sendToken(receiverAddress: string, amount: number, network: string): Promise<string> {
-    const wallet = new Wallet(decrypt(this.configService.get<string>('PRIVATE_KEY') as string), this.provider);    
+    const wallet = new Wallet(decrypt(this.configService.get<string>('PRIVATE_KEY') as string), this.provider);
     const contract = new ethers.Contract(NETWORKS[network].contractAddress, ERC20ABI, wallet);
     const txObj = await contract.transfer(receiverAddress, ethers.utils.parseUnits(amount + ''));
     const tx = await txObj.wait();
@@ -45,6 +45,18 @@ export class AppService {
 
     const txObj = await wallet.sendTransaction(tx);
     return txObj.hash;
+  }
+
+  private async checkBalance(request: RequestToken): Promise<void> {
+    const walletAddress = request.walletAddress;
+    this.connectWeb3(request.network);
+
+    const balanceOf = await this.provider.getBalance(walletAddress);
+    const pointOneEther = ethers.utils.parseEther('0.01');
+
+    if (balanceOf.gte(pointOneEther)) {
+      throw Error('This wallet is not eligible to request any tokens at this time. Please try again later or use a different wallet.  Thanks!');
+    }
   }
 
   private async checkResetPeriod(request: RequestToken, ipAddress: string): Promise<void> {
@@ -161,13 +173,15 @@ export class AppService {
     }
 
     await this.checkResetPeriod(request, ipAddress);
+    await this.checkBalance(request);
+
     const crt = await this.canRequestToken(request, ipAddress);
     if (crt) {
       this.logger.debug(`Sending Amount: ${amount} to address ${request.walletAddress} on ${request.network}`);
 
       this.connectWeb3(request.network);
       let hash;
-      if(NETWORKS[request.network].isNative) {
+      if (NETWORKS[request.network].isNative) {
         hash = await this.sendDAI(request.walletAddress, amount);
       } else {
         hash = await this.sendToken(request.walletAddress, amount, request.network);
