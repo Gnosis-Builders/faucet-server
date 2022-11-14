@@ -160,13 +160,20 @@ export class AppService {
         if (urlMatches !== null) {
           const id = urlMatches[1];
           const tweet = await this.parseTweet(id);
-          const tweetRegex = /Requesting (0.0\d+)/;
-          const tweetMatches = tweetRegex.exec(tweet);
+          this.logger.debug(tweet);
+          let tweetRegex = /Requesting (0.0\d+)/;
+          let tweetMatches = tweetRegex.exec(tweet);
           if (tweetMatches) {
             amount = Number(tweetMatches[1]);
             if (amount !== +request.amount) {
               throw Error('Amount in tweet does not match amount in request');
             }
+          }
+
+          tweetRegex = /By @gnosisbuilders/;
+          tweetMatches = tweetRegex.exec(tweet);
+          if (tweetMatches === null) {
+            throw Error('Invalid Tweet URL');
           }
         }
       }
