@@ -18,9 +18,9 @@ export const NETWORKS: Record<string, Network> = {
   [GNOSIS]: {
     name: GNOSIS,
     waitTime: 86400000,
-    lowerAmount: 0.001,
-    higherAmount: 0.01,
-    tweetText: 'Requesting 0.01xDAI funds from the Official xDAI Faucet on Gnosis Chain. https://gnosisfaucet.com',
+    lowerAmount: 0.0005,
+    higherAmount: 0.001,
+    tweetText: 'Requesting 0.001xDAI funds from the Official xDAI Faucet on Gnosis Chain. https://gnosisfaucet.com',
     web3Provider: 'https://rpc.ankr.com/gnosis',
     contractAddress: '',
     isNative: true,

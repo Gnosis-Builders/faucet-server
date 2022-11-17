@@ -52,10 +52,10 @@ export class AppService {
     this.connectWeb3(request.network);
 
     const balanceOf = await this.provider.getBalance(walletAddress);
-    const pointOneEther = ethers.utils.parseEther('0.01');
+    const pointOneEther = ethers.utils.parseEther('0.001');
 
     if (balanceOf.gte(pointOneEther)) {
-      throw Error('This wallet is not eligible to request any tokens at this time. Please try again later or use a different wallet.  Thanks!');
+      throw Error('Faucet requests are only available to addresses with less than 0.001 xDAI balance.');
     }
   }
 
