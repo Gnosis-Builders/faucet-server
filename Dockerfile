@@ -5,4 +5,4 @@ RUN yarn
 COPY . .
 RUN ls -las
 EXPOSE 7002
-ENTRYPOINT yarn start
+CMD [ "yarn", "start" ]
