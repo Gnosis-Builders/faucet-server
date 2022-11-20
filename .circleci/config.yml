@@ -10,7 +10,7 @@ jobs:
       - run:
         name: Install Linux Packages
         command: apt-get install -y sshpass
-      - run: sshpass -p $PASSWORD ssh -oStrictHostKeyChecking=no -v deployer@gnosisfaucet.com "./deploy_faucet_server.sh"
+      - run: ssh -oStrictHostKeyChecking=no -v gnosis@178.62.227.183 "./deploy_faucet_server.sh"
 
 # Orchestrate our job run sequence
 workflows:
