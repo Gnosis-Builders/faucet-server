@@ -7,7 +7,7 @@ jobs:
       - image: arvindr226/alpine-ssh
     steps:
       - checkout
-      - run: !
+      - run: |
         ssh -oStrictHostKeyChecking=no gnosis@178.62.227.183 bash -c 'mkdir -p src/faucet-server-docker'  
         scp -oStrictHostKeyChecking=no docker-compose.yml .env gnosis@178.62.227.183:src/faucet-server-docker/
         ssh -oStrictHostKeyChecking=no gnosis@178.62.227.183 bash -c 'docker-compose up'
