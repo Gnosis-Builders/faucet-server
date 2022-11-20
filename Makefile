@@ -1,15 +1,12 @@
-build:
-	echo ${VERSION}
-	docker buildx build -t silkroad.money/faucet-server:${VERSION} . --push
-forcebuild: 
-	docker buildx build -t silkroad.money/faucet-server:${VERSION} . --no-cache --push
+pre-build:
+	docker buildx create --name mybuilder --driver docker-container --bootstrap || docker buildx use mybuilder	
+build:pre-build
+	docker buildx build --platform linux/amd64,linux/arm64 -t silkroad.money/faucet-server:${VERSION} . --push
+force-build:pre-build
+	docker buildx build --platform linux/amd64,linux/arm64 -t silkroad.money/faucet-server:${VERSION} . --no-cache --push
 run: build
 	docker-compose up
-rundaemon: build
+run-daemon: build
 	docker-compose up -d
-deployforce:forcebuild
-	# VERSION=v1.0.0 make deploy
-	docker push silkroad.money/faucet-server:${VERSION}
+force-deploy:force-build
 deploy:build
-	# VERSION=v1.0.0 make deploy
-	docker push silkroad.money/faucet-server:${VERSION}	
