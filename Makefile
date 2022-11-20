@@ -1,16 +1,15 @@
 build:
-	docker build . -t gnosis-builders/faucet-server
+	echo ${VERSION}
+	docker buildx build -t silkroad.money/faucet-server:${VERSION} . --push
 forcebuild: 
-	docker build . -t gnosis-builders/faucet-server --no-cache
+	docker buildx build -t silkroad.money/faucet-server:${VERSION} . --no-cache --push
 run: build
 	docker-compose up
 rundaemon: build
 	docker-compose up -d
 deployforce:forcebuild
 	# VERSION=v1.0.0 make deploy
-	docker tag gnosis-builders/faucet-server silkroad.money/faucet-server:${VERSION}
 	docker push silkroad.money/faucet-server:${VERSION}
 deploy:build
 	# VERSION=v1.0.0 make deploy
-	docker tag gnosis-builders/faucet-server silkroad.money/faucet-server:${VERSION}
 	docker push silkroad.money/faucet-server:${VERSION}	
