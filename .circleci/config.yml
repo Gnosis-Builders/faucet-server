@@ -7,7 +7,7 @@ jobs:
       - image: arvindr226/alpine-ssh
     steps:
       - checkout
-      - run: ssh -oStrictHostKeyChecking=no -v $USER@$IP "./deploy.sh"
+      - run: ssh -oStrictHostKeyChecking=no -v gnosis@gnosisfaucet.com "./deploy.sh"
 
 # Orchestrate our job run sequence
 workflows:
