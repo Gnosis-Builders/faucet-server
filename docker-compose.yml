@@ -1,0 +1,10 @@
+services:
+  faucet-server:
+    image: silkroad.money/faucet-server:v1.0.1
+    restart: unless-stopped
+    env_file:
+      - .env
+    labels:
+      PORT: ${PORT}    
+    ports:
+      - '${PORT}:${PORT}'
