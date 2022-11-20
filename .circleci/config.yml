@@ -13,7 +13,8 @@ jobs:
       - run: echo $DOCKERHUB_PASSWORD | ssh -oStrictHostKeyChecking=no gnosis@178.62.227.183 '\
           docker login silkroad.money --username docker-registry-user --password-stdin; \
           cd src/faucet-server-docker; \
-          docker-compose up'
+          docker-compose up'   
+                 
 # Orchestrate our job run sequence
 workflows:
   version: 2
