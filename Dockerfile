@@ -4,5 +4,5 @@ COPY package*.json ./
 RUN yarn
 COPY . .
 RUN ls -las
-EXPOSE $PORT
+EXPOSE 7002
 ENTRYPOINT yarn start
