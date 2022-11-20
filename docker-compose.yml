@@ -1,3 +1,4 @@
+version: "3"
 services:
   faucet-server:
     image: silkroad.money/faucet-server:v1.0.2
