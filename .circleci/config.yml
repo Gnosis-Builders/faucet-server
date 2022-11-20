@@ -7,9 +7,6 @@ jobs:
       - image: arvindr226/alpine-ssh
     steps:
       - checkout
-      - run:
-        name: Install Linux Packages
-        command: apt-get install -y sshpass
       - run: ssh -oStrictHostKeyChecking=no -v gnosis@178.62.227.183 "./deploy_faucet_server.sh"
 
 # Orchestrate our job run sequence
