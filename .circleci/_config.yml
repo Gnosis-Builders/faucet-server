@@ -1,0 +1,24 @@
+version: 2.1
+
+# Define the jobs we want to run for this project
+jobs:
+  pull-and-build:
+    docker:
+      - image: arvindr226/alpine-ssh
+    steps:
+      - checkout
+      - run: ./create.env.sh
+      - run: ssh -oStrictHostKeyChecking=no gnosis@178.62.227.183 'mkdir -p src/faucet-server-docker'  
+      - run: scp -oStrictHostKeyChecking=no -r . gnosis@178.62.227.183:src/faucet-server-docker/
+      - run: ssh -oStrictHostKeyChecking=no gnosis@178.62.227.183 'cd src/faucet-server-docker; yarn && yarn start'
+                 
+# Orchestrate our job run sequence
+workflows:
+  version: 2
+  build-project:
+    jobs:
+      - pull-and-build:
+          filters:
+            branches:
+              only:
+                - master
