@@ -55,7 +55,7 @@ export class AppService {
     const pointOneEther = ethers.utils.parseEther('0.0025');
 
     if (balanceOf.gte(pointOneEther)) {
-      throw Error('Faucet requests are only available to addresses with less than 0.001 xDAI balance.');
+      throw Error('Faucet requests are only available to addresses with less than 0.0025 xDAI balance.');
     }
   }
 
