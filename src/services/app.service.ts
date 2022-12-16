@@ -73,10 +73,9 @@ export class AppService {
 
     if (dbUser != null) {
       const addresses = dbUser.resetWalletAddresses;
-      const lastResetDate = +dbUser.lastResetDate;
+      const lastResetDate = Number.isNaN(dbUser.lastResetDate) ? 0 : Number(dbUser.lastResetDate);
       const thirtyDays = 30 * 24 * 60 * 60 * 1000;
       const now = new Date().getTime();
-
       if (lastResetDate + thirtyDays <= now) {
         dbUser.lastResetDate = now.toString();
         dbUser.resetWalletAddresses = [];
