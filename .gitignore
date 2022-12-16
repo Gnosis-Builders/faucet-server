@@ -38,3 +38,4 @@ node_modules
 ormconfig.json
 faucet.db
 migration
+.yarn
