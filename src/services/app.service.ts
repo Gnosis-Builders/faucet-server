@@ -5,7 +5,7 @@ import { ethers, Wallet } from 'ethers';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { Repository } from 'typeorm';
-import { decrypt } from 'src/utils/common';
+import { decrypt, verifyABI } from 'src/utils/common';
 import TwitterApi from 'twitter-api-v2';
 import { ERC20ABI, GNOSIS, NETWORKS } from 'src/utils/constants';
 
@@ -52,10 +52,15 @@ export class AppService {
     this.connectWeb3(request.network);
 
     const balanceOf = await this.provider.getBalance(walletAddress);
-    const pointOneEther = ethers.utils.parseEther('0.0025');
+    const pointOneEther = ethers.utils.parseEther(NETWORKS[request.network].lowerAmount.toString());
+    const oneCentEther = ethers.utils.parseEther(NETWORKS[request.network].smartContractAmount.toString());
 
-    if (balanceOf.gte(pointOneEther)) {
-      throw Error('Faucet requests are only available to addresses with less than 0.0025 xDAI balance.');
+    if (+request.amount >= NETWORKS[request.network].smartContractAmount) {
+      if (balanceOf.gte(oneCentEther)) {
+        throw Error(`Faucet requests are only available to addresses with less than ${NETWORKS[request.network].smartContractAmount} xDAI balance.`);
+      }
+    } else if (balanceOf.gte(pointOneEther)) {
+      throw Error(`Faucet requests are only available to addresses with less than ${NETWORKS[request.network].lowerAmount} xDAI balance.`);
     }
   }
 
@@ -117,6 +122,7 @@ export class AppService {
         lastNetwork: 'Gnosis Chain',
         lastResetDate: Date.now().toString(),
         resetWalletAddresses: [],
+        smartContractABI: '',
       };
     }
 
@@ -134,6 +140,7 @@ export class AppService {
       lastNetwork: request.network,
       lastResetDate: dbUser.lastResetDate,
       resetWalletAddresses: [...dbUser.resetWalletAddresses, request.walletAddress],
+      smartContractABI: request.smartContractABI,
     };
 
     this.userRepository.save(dbUser);
@@ -151,7 +158,11 @@ export class AppService {
   async requestToken(request: RequestToken, ipAddress: string): Promise<string> {
     let amount = NETWORKS[request.network].lowerAmount;
 
-    // TODO: check tweetUrl here
+    if (+request.amount >= NETWORKS[request.network].smartContractAmount) {
+      verifyABI(request.smartContractABI);
+      amount = NETWORKS[request.network].smartContractAmount;
+    }
+
     if (request.network === GNOSIS) {
       if (request.tweetUrl.length > 0) {
         // get the tweet amount from the tweet url
@@ -180,6 +191,7 @@ export class AppService {
     }
 
     await this.checkResetPeriod(request, ipAddress);
+
     await this.checkBalance(request);
 
     const crt = await this.canRequestToken(request, ipAddress);

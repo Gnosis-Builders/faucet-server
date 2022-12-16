@@ -18,8 +18,10 @@ export class UserEntity {
   lastWalletAddress: string;
   @Column({ default: '' })
   lastNetwork: Network;
-  @Column({default: ''})
+  @Column({ default: '' })
   lastResetDate: string;
-  @Column({type: 'simple-array', default: ''})
+  @Column({ type: 'simple-array', default: '' })
   resetWalletAddresses: string[];
+  @Column({ default: '' })
+  smartContractABI: string;  
 }

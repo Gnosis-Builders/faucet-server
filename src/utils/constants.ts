@@ -8,6 +8,7 @@ type Network = {
   waitTime: number;
   lowerAmount: number;
   higherAmount: number;
+  smartContractAmount: number;
   tweetText: string;
   web3Provider: string;
   contractAddress: string;
@@ -20,6 +21,7 @@ export const NETWORKS: Record<string, Network> = {
     waitTime: 86400000,
     lowerAmount: 0.0025,
     higherAmount: 0.005,
+    smartContractAmount: 0.01,
     tweetText: 'Requesting 0.001xDAI funds from the Official xDAI Faucet on Gnosis Chain. https://gnosisfaucet.com',
     web3Provider: 'https://rpc.ankr.com/gnosis',
     contractAddress: '',
@@ -30,6 +32,7 @@ export const NETWORKS: Record<string, Network> = {
     waitTime: 3600000,
     lowerAmount: 1,
     higherAmount: 1,
+    smartContractAmount: 1,
     tweetText: '',
     web3Provider: 'https://rpc.chiadochain.net',
     contractAddress: '',
@@ -40,6 +43,7 @@ export const NETWORKS: Record<string, Network> = {
     waitTime: 86400000,
     lowerAmount: 0.001,
     higherAmount: 0.01,
+    smartContractAmount: 0.01,
     tweetText: '',
     web3Provider: 'https://optimism.gnosischain.com',
     contractAddress: '',
@@ -50,6 +54,7 @@ export const NETWORKS: Record<string, Network> = {
     waitTime: 3600000,
     lowerAmount: 4,
     higherAmount: 4,
+    smartContractAmount: 4,
     tweetText: '',
     web3Provider: 'https://rpc.chiadochain.net',
     contractAddress: '0xf907903Be10FC3a885d331C4E225794436a34c9f',

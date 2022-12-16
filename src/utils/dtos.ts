@@ -5,4 +5,5 @@ export interface RequestToken {
   network: Network;
   tweetUrl: string;
   amount: string;
+  smartContractABI: string;
 }

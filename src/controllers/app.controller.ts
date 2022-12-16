@@ -12,7 +12,6 @@ export class AppController {
 
   @Post('/request-token')
   async requestToken(@Body() request: RequestToken, @Req() req): Promise<Response> {
-    Logger.debug(request);
     let ipAddress = req.headers['x-forwarded-for'];
 
     if (ipAddress !== undefined) {
