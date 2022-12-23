@@ -83,8 +83,8 @@ const _verifyABIArray = (abi: Array<ABIElement>) => {
 
     if (element.inputs.length > 0) {
       element.inputs.forEach((input: ABIElements) => {
-        if (isNullOrUndefined(input.name) && isNullOrUndefined(input.type) && isNullOrUndefined(input.internalType)) {
-          throw new Error('Invalid ABI: Missing InputElements|OutputElements (name | type | internalType) on ' + input.name);
+        if (isNullOrUndefined(input.name) && isNullOrUndefined(input.type)) {
+          throw new Error('Invalid ABI: Missing InputElements|OutputElements (name | type) on ' + input.name);
         }
 
         if (!isNullOrUndefined(input.components) && !Array.isArray(input.components)) {
@@ -97,8 +97,8 @@ const _verifyABIArray = (abi: Array<ABIElement>) => {
       const outputs = element.outputs as Array<ABIElements>;
       if (outputs.length > 0) {
         outputs.forEach((output: ABIElements) => {
-          if (isNullOrUndefined(output.name) && isNullOrUndefined(output.type) && isNullOrUndefined(output.internalType)) {
-            throw new Error('Invalid ABI: Missing InputElements|OutputElements (name | type | internalType) on ' + output.name);
+          if (isNullOrUndefined(output.name) && isNullOrUndefined(output.type)) {
+            throw new Error('Invalid ABI: Missing InputElements|OutputElements (name | type) on ' + output.name);
           }
 
           if (!isNullOrUndefined(output.components) && !Array.isArray(output.components)) {
