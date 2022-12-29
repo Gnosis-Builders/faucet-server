@@ -109,7 +109,7 @@ export class AppService {
       const now = new Date().getTime();
 
       if (expiry > now) {
-        throw Error('User has already requested a token, You can request again by: ' + new Date(expiry).toString());
+        throw Error('You have already requested a token, You can request again by: ' + new Date(expiry).toString());
       }
     } else {
       dbUser = {
