@@ -29,6 +29,7 @@
     "rock": "ngrok http --host-header=rewrite 7002"
   },
   "dependencies": {
+    "@nestjs-modules/mailer": "^1.8.1",
     "@nestjs/common": "^7.5.1",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^7.5.1",
@@ -37,7 +38,9 @@
     "@types/crypto-js": "^4.1.1",
     "@types/request-ip": "^0.0.37",
     "crypto-js": "^4.1.1",
+    "dotenv": "^16.0.3",
     "ethers": "^5.6.9",
+    "nodemailer": "^6.8.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.5.6",
