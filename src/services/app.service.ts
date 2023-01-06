@@ -8,8 +8,8 @@ import { Repository } from 'typeorm';
 import { decrypt, verifyABI } from 'src/utils/common';
 import TwitterApi from 'twitter-api-v2';
 import { ERC20ABI, GNOSIS, NETWORKS } from 'src/utils/constants';
-import { RequestAmountService } from "./request.amount.service";
-import { MailerService } from "@nestjs-modules/mailer";
+import { RequestAmountService } from './request.amount.service';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AppService {
@@ -19,7 +19,7 @@ export class AppService {
 
   @InjectRepository(UserEntity) userRepository: Repository<UserEntity>;
 
-  constructor(private configService: ConfigService, private requestAmountService: RequestAmountService, private mailerService: MailerService) {
+  constructor(private configService: ConfigService, private requestAmountService: RequestAmountService) {
     this.logger.debug('AppService Loaded');
   }
 
@@ -76,7 +76,7 @@ export class AppService {
     if (dbUser != null) {
       const addresses = dbUser.resetWalletAddresses;
       const lastResetDate = Number.isNaN(dbUser.lastResetDate) ? 0 : Number(dbUser.lastResetDate);
-      const thirtyDays = Number(this.configService.get<number>("RESET_PERIOD")) * 24 * 60 * 60 * 1000;
+      const thirtyDays = Number(this.configService.get<number>('RESET_PERIOD')) * 24 * 60 * 60 * 1000;
       const now = new Date().getTime();
       if (lastResetDate + thirtyDays <= now) {
         dbUser.lastResetDate = now.toString();
@@ -204,7 +204,7 @@ export class AppService {
       this.connectWeb3(request.network);
       let hash;
       if (NETWORKS[request.network].isNative) {
-        hash = await this.sendDAI(request.walletAddress, amount);        
+        hash = await this.sendDAI(request.walletAddress, amount);
       } else {
         hash = await this.sendToken(request.walletAddress, amount, request.network);
       }

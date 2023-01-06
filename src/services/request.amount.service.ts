@@ -24,7 +24,7 @@ export class RequestAmountService {
       .orWhere('walletAddress = :wa', { ln: request.walletAddress })
       .getOne();
     if (requestAmount) {
-      if (requestAmount.cumulativeAmount >= 1) {
+      if (requestAmount.cumulativeAmount >= Number(this.configService.get<number>("ALERT_AMOUNT"))) {
         const thirtyDays = Number(this.configService.get<number>('RESET_PERIOD')) * 24 * 60 * 60 * 1000;
         const now = new Date().getTime();
         // send one alert every thirty days
