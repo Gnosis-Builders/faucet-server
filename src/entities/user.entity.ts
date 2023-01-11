@@ -24,4 +24,6 @@ export class UserEntity {
   resetWalletAddresses: string[];
   @Column({ default: '' })
   smartContractABI: string;  
+  @Column({default: false})
+  isBlacklisted: boolean;
 }

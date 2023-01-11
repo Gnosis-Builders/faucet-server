@@ -1,4 +1,4 @@
-import { Body, Controller, Logger, Post, Req, UseFilters } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Post, Req, UseFilters } from '@nestjs/common';
 import { AppService } from '../services/app.service';
 import { RequestToken } from '../utils/dtos';
 import { ExceptionsFilter } from '../filters/exception.filter';
@@ -21,5 +21,10 @@ export class AppController {
     }
 
     return ResponseUtils.getSuccessResponse(await this.appService.requestToken(request, ipAddress), '');
+  }
+
+  @Get('/run-blacklist-check')
+  async runBlacklistCheck(): Promise<Response> {
+    return ResponseUtils.getSuccessResponse(await this.appService.runBlacklistCheck(), '');
   }
 }
