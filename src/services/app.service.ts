@@ -4,10 +4,11 @@ import { RequestToken } from '../utils/dtos';
 import { ethers, Wallet } from 'ethers';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../entities/user.entity';
-import { Repository } from 'typeorm';
+import { getManager, Repository } from 'typeorm';
 import { decrypt, verifyABI } from 'src/utils/common';
 import TwitterApi from 'twitter-api-v2';
 import { ERC20ABI, GNOSIS, NETWORKS } from 'src/utils/constants';
+import { Blacklisted } from 'src/entities/blacklist.entity';
 
 @Injectable()
 export class AppService {
@@ -16,6 +17,7 @@ export class AppService {
   private provider: ethers.providers.JsonRpcProvider;
 
   @InjectRepository(UserEntity) userRepository: Repository<UserEntity>;
+  @InjectRepository(Blacklisted) blacklistedRepository: Repository<Blacklisted>;
 
   constructor(private configService: ConfigService) {
     this.logger.debug('AppService Loaded');
@@ -111,6 +113,12 @@ export class AppService {
       if (expiry > now) {
         throw Error('You have already requested a token, You can request again by: ' + new Date(expiry).toString());
       }
+
+      if (dbUser.isBlacklisted) {
+        // fail silently
+        this.logger.debug('Blacklisted user tried to request token: ' + request.walletAddress + ' : ' + ipAddress);
+        return false;
+      }
     } else {
       dbUser = {
         expiry: '',
@@ -122,6 +130,7 @@ export class AppService {
         lastResetDate: Date.now().toString(),
         resetWalletAddresses: [],
         smartContractABI: '',
+        isBlacklisted: false,
       };
     }
 
@@ -140,6 +149,7 @@ export class AppService {
       lastResetDate: dbUser.lastResetDate,
       resetWalletAddresses: [...dbUser.resetWalletAddresses, request.walletAddress],
       smartContractABI: request.smartContractABI,
+      isBlacklisted: dbUser.isBlacklisted,
     };
 
     this.userRepository.save(dbUser);
@@ -205,7 +215,49 @@ export class AppService {
         hash = await this.sendToken(request.walletAddress, amount, request.network);
       }
       return hash;
+    } else {
+      // fail silently
+      return request.walletAddress;
     }
-    return '';
+  }
+
+  async runBlacklistCheck(): Promise<Array<Blacklisted>> {
+    const entityManager = getManager();
+
+    const toBlacklist = (await entityManager.query(`
+    SELECT * FROM user u 
+    WHERE LENGTH(u.walletAddresses) - LENGTH(REPLACE(u.walletAddresses, ',', '')) > ${this.configService.get<number>('MAX_REQUESTS_BEFORE_BLACKLIST')}
+    AND u.isBlacklisted = false
+  `)) as unknown as Array<UserEntity>;
+
+    this.logger.debug(toBlacklist);
+
+    if (toBlacklist.length > 0) {
+      const blacklistedList = toBlacklist.map((tb) => {
+        const blacklisted: Blacklisted = {
+          blacklistedDate: Date.now(),
+          ipAddress: tb.ipAddress,
+          walletAddress: tb.lastWalletAddress,
+        };
+
+        return blacklisted;
+      });
+
+      this.blacklistedRepository.createQueryBuilder('blacklisted').insert().into(Blacklisted).values(blacklistedList).execute();
+
+      blacklistedList.forEach((bl) => {
+        // update user repo
+        this.userRepository
+          .createQueryBuilder('user')
+          .update()
+          .set({ isBlacklisted: true })
+          .where('ipAddress = :ip', { ip: bl.ipAddress })
+          .orWhere('lastWalletAddress = :lwa', { lwa: bl.walletAddress })
+          .execute();
+      });
+      return blacklistedList;
+    }
+
+    return [];
   }
 }
